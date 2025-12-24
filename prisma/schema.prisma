@@ -1,0 +1,112 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          Role      @default(USER)
+  subscriptionTier SubscriptionTier @default(FREE)
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orders        Order[]
+  analytics     Analytics[]
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String
+  excerpt     String
+  category    String
+  tags        String[]
+  seoTitle    String
+  seoDescription String
+  keywords    String[]
+  publishedAt DateTime @default(now())
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  type        ProductType
+  affiliateUrl String?
+  commission  Float?
+  category    String
+  createdAt   DateTime @default(now())
+  orders      Order[]
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  userId          String
+  productId       String
+  amount          Float
+  status          OrderStatus
+  stripePaymentId String?
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id])
+  product         Product  @relation(fields: [productId], references: [id])
+}
+
+model Subscriber {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  source      String
+  status      SubscriberStatus @default(ACTIVE)
+  subscribedAt DateTime @default(now())
+  tags        String[]
+}
+
+model Analytics {
+  id         String   @id @default(cuid())
+  event      String
+  properties Json
+  userId     String?
+  sessionId  String
+  timestamp  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum ProductType {
+  DIGITAL
+  AFFILIATE
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+}
+
+enum SubscriberStatus {
+  ACTIVE
+  UNSUBSCRIBED
+}
