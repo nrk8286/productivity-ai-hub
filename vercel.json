@@ -31,7 +31,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "TODO: Replace with specific domains in production"
         },
         {
           "key": "Access-Control-Allow-Methods",

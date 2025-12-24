@@ -103,13 +103,10 @@ export async function getCurrentUser(sessionToken?: string) {
   if (!sessionToken) return null;
 
   try {
-    const user = await prisma.user.findFirst({
-      where: {
-        // This would need proper session handling
-        email: { not: "" },
-      },
-    });
-    return user;
+    // In production, this would properly validate the session token
+    // For now, this is a placeholder that requires proper implementation
+    // with session token validation
+    return null;
   } catch {
     return null;
   }
