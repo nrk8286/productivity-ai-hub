@@ -1,12 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  throw new Error("ANTHROPIC_API_KEY is not defined");
-}
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const anthropic = process.env.ANTHROPIC_API_KEY 
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
 
 export interface GenerateContentOptions {
   topic: string;
@@ -24,6 +20,13 @@ export async function generateContent(options: GenerateContentOptions) {
     length = "medium",
     targetAudience = "remote teams and productivity enthusiasts",
   } = options;
+
+  if (!anthropic) {
+    return {
+      success: false,
+      error: "Anthropic API key not configured",
+    };
+  }
 
   const prompts = {
     blog: `Write a comprehensive, SEO-optimized blog post about "${topic}". 
@@ -116,6 +119,13 @@ Focus on benefits, create urgency, and be specific.`,
 }
 
 export async function improveContent(content: string, instructions: string) {
+  if (!anthropic) {
+    return {
+      success: false,
+      error: "Anthropic API key not configured",
+    };
+  }
+
   try {
     const message = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
@@ -155,6 +165,13 @@ Provide the improved version maintaining the same format.`,
 }
 
 export async function generateBlogPostIdeas(topic: string, count: number = 10) {
+  if (!anthropic) {
+    return {
+      success: false,
+      error: "Anthropic API key not configured",
+    };
+  }
+
   try {
     const message = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",

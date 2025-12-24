@@ -1,13 +1,11 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("STRIPE_SECRET_KEY is not defined");
-}
-
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-11-20.acacia",
-  typescript: true,
-});
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2023-10-16",
+      typescript: true,
+    })
+  : null;
 
 export const PRICE_IDS = {
   PROFESSIONAL: process.env.STRIPE_PROFESSIONAL_PRICE_ID || "price_professional",
@@ -27,6 +25,10 @@ export async function createCheckoutSession({
   successUrl: string;
   cancelUrl: string;
 }) {
+  if (!stripe) {
+    return { session: null, error: new Error("Stripe not configured") };
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -62,6 +64,10 @@ export async function createCustomerPortalSession({
   customerId: string;
   returnUrl: string;
 }) {
+  if (!stripe) {
+    return { session: null, error: new Error("Stripe not configured") };
+  }
+
   try {
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
@@ -118,8 +124,8 @@ export function constructWebhookEvent(
 ): Stripe.Event | null {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  if (!webhookSecret) {
-    console.error("STRIPE_WEBHOOK_SECRET is not defined");
+  if (!webhookSecret || !stripe) {
+    console.error("Stripe webhook secret or client not configured");
     return null;
   }
 

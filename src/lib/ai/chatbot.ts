@@ -1,12 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-if (!process.env.ANTHROPIC_API_KEY) {
-  throw new Error("ANTHROPIC_API_KEY is not defined");
-}
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -21,6 +17,13 @@ export interface ChatbotOptions {
 
 export async function chat(options: ChatbotOptions) {
   const { messages, context, maxTokens = 1000 } = options;
+
+  if (!anthropic) {
+    return {
+      success: false,
+      error: "Anthropic API key not configured",
+    };
+  }
 
   const systemPrompt = `You are a helpful AI assistant for Productivity AI Hub, a platform that helps remote teams work more efficiently. 
 
@@ -75,6 +78,10 @@ Guidelines:
 export async function suggestNextQuestions(
   conversationHistory: ChatMessage[]
 ): Promise<string[]> {
+  if (!anthropic) {
+    return [];
+  }
+
   try {
     const message = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",

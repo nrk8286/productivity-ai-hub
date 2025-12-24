@@ -1,10 +1,8 @@
 import { Resend } from "resend";
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error("RESEND_API_KEY is not defined");
-}
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "noreply@productivity-ai-hub.com";
 
@@ -17,6 +15,10 @@ export interface SendEmailOptions {
 }
 
 export async function sendEmail(options: SendEmailOptions) {
+  if (!resend) {
+    return { success: false, error: new Error("Resend API key not configured") };
+  }
+
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
@@ -24,7 +26,7 @@ export async function sendEmail(options: SendEmailOptions) {
       subject: options.subject,
       html: options.html,
       text: options.text,
-      replyTo: options.replyTo,
+      reply_to: options.replyTo,
     });
 
     if (error) {
