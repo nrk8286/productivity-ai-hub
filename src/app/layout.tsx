@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { generateSEO } from "@/lib/seo";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = generateSEO({
   title: "Productivity AI Hub - AI-Powered Tools for Remote Teams",
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );
