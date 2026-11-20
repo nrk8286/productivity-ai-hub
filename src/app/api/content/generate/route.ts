@@ -22,6 +22,9 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+    if (!process.env.ANTHROPIC_API_KEY || !process.env.ANTHROPIC_MODEL) {
+      return NextResponse.json({ error: "AI service not configured" }, { status: 503 });
+    }
 
     const body = await request.json();
     

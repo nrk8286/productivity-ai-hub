@@ -3,6 +3,8 @@ import { getAnalyticsMetrics } from "@/lib/analytics/tracking";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,6 +27,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    if (!Number.isFinite(Date.parse(startDate)) || !Number.isFinite(Date.parse(endDate)) || new Date(startDate) > new Date(endDate)) {
+      return NextResponse.json({ error: "Invalid date range" }, { status: 400 });
+    }
+
     const metrics = await getAnalyticsMetrics(
       new Date(startDate),
       new Date(endDate)
@@ -34,8 +40,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Dashboard metrics error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: "Analytics temporarily unavailable" },
+      { status: 503 }
     );
   }
 }

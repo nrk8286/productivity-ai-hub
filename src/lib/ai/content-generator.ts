@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicModel } from "./config";
 
 const anthropic = process.env.ANTHROPIC_API_KEY 
   ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -86,7 +87,7 @@ Focus on benefits, create urgency, and be specific.`,
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: getAnthropicModel(),
       max_tokens: length === "long" ? 4000 : length === "medium" ? 2500 : 1500,
       messages: [
         {
@@ -128,7 +129,7 @@ export async function improveContent(content: string, instructions: string) {
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: getAnthropicModel(),
       max_tokens: 2000,
       messages: [
         {
@@ -174,7 +175,7 @@ export async function generateBlogPostIdeas(topic: string, count: number = 10) {
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: getAnthropicModel(),
       max_tokens: 1000,
       messages: [
         {

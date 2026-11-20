@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { planType } = body;
 
-    if (!planType || !["professional", "enterprise"].includes(planType.toLowerCase())) {
+    if (typeof planType !== "string" || !["professional", "enterprise"].includes(planType.toLowerCase())) {
       return NextResponse.json(
         { error: "Invalid plan type" },
         { status: 400 }
@@ -27,6 +27,10 @@ export async function POST(request: NextRequest) {
     const priceId = planType.toLowerCase() === "professional" 
       ? PRICE_IDS.PROFESSIONAL 
       : PRICE_IDS.ENTERPRISE;
+
+    if (!priceId || !process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+      return NextResponse.json({ error: "Billing not configured" }, { status: 503 });
+    }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 

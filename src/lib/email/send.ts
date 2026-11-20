@@ -75,7 +75,7 @@ export async function sendOnboardingEmail(email: string, name: string, step: num
           <li>Test it once to make sure it works</li>
           <li>Let it run automatically from now on</li>
         </ol>
-        <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/automations">Create Your First Automation →</a></p>
+        <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">Open Your Dashboard</a></p>
       `,
     },
     {

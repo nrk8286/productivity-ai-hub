@@ -17,20 +17,20 @@ export default function AboutPage() {
             Building the Future of Remote Work
           </h1>
           <p className="text-lg text-muted-foreground">
-            We're on a mission to make distributed teams more productive, connected, and successful.
+            We&apos;re on a mission to make distributed teams more productive, connected, and successful.
           </p>
         </div>
 
         <div className="prose prose-lg max-w-none">
           <h2>Our Story</h2>
           <p>
-            Productivity AI Hub was born from a simple frustration: remote work tools weren't keeping up with how teams actually work. We spent too much time switching between apps, searching for information, and doing repetitive tasks that should be automated.
+            Productivity AI Hub was born from a simple frustration: remote work tools weren&apos;t keeping up with how teams actually work. We spent too much time switching between apps, searching for information, and doing repetitive tasks that should be automated.
           </p>
           <p>
             In 2023, our founders (who had been working remotely for years) decided to build something better. We combined AI automation, intelligent workflows, and beautiful design to create tools that actually help teams get work done.
           </p>
           <p>
-            Today, we serve over 10,000 teams across 50 countries, from startups to Fortune 500 companies. But we're just getting started.
+            Today, we serve over 10,000 teams across 50 countries, from startups to Fortune 500 companies. But we&apos;re just getting started.
           </p>
         </div>
 
@@ -40,7 +40,7 @@ export default function AboutPage() {
               <Users className="h-10 w-10 text-primary mb-4" />
               <h3 className="text-xl font-bold mb-2">Remote-First</h3>
               <p className="text-muted-foreground">
-                We're a distributed team across 15 countries. We practice what we preach and build tools we use ourselves.
+                We&apos;re a distributed team across 15 countries. We practice what we preach and build tools we use ourselves.
               </p>
             </CardContent>
           </Card>
@@ -76,7 +76,7 @@ export default function AboutPage() {
         <div className="bg-muted/50 p-8 rounded-lg">
           <h2 className="text-2xl font-bold mb-4">Join Our Journey</h2>
           <p className="text-muted-foreground mb-4">
-            We're always looking for talented, passionate people to join our team. Check out our open positions or reach out if you think you'd be a great fit.
+            We&apos;re always looking for talented, passionate people to join our team. Check out our open positions or reach out if you think you&apos;d be a great fit.
           </p>
           <a href="/contact" className="text-primary hover:underline font-semibold">
             Get in touch →
