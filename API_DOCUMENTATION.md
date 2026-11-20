@@ -1,420 +1,54 @@
-# API Documentation
+# API documentation
 
-## Base URL
-
-**Development:** `http://localhost:3000/api`  
-**Production:** `https://your-domain.com/api`
+All paths are relative to the Next.js application origin. Use HTTPS and configure the actual public URLs and provider settings described in [README.md](README.md). Application builds do not initialize or migrate the database.
 
 ## Authentication
 
-Most API endpoints require authentication using NextAuth.js session cookies.
+Open `/login` for the NextAuth credentials form, or use `signIn("credentials", ...)` from `next-auth/react`. NextAuth requires its CSRF token for form callbacks; a plain JSON POST containing only an email and password is not a supported login flow. Accounts must first be provisioned with `npm run account:create`.
 
-```typescript
-// Example authenticated request
-const response = await fetch('/api/protected-route', {
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  credentials: 'include', // Important: include cookies
+Authenticated requests use the NextAuth session cookie. Same-origin `fetch` includes it automatically. GET `/api/auth/session` returns session information; use the NextAuth sign-out UI at `/api/auth/signout` to end the session.
+
+## Endpoints
+
+| Method and path | Access | Request and behavior |
+| --- | --- | --- |
+| POST `/api/contact` | Public | JSON `name`, `email`, `subject`, `message`; validates size and format, stores a contact message, then returns `201 { "received": true }`. A database failure returns 503. |
+| POST `/api/email/subscribe` | Public | JSON `email`, optional `name` and `source`; persists a subscriber. It does not send a welcome email. |
+| POST `/api/email/send` | Administrator | JSON `to` (email or array), `subject`, `html`, optional `text` and `replyTo`; sends through configured Resend. Returns 401 without a session, 403 for a non-admin, and 503 when delivery is not configured. |
+| POST `/api/analytics/track` | Public; session optional | JSON `event`, `sessionId`, optional `properties`; persists an event. Any associated user ID comes from the authenticated session, not a caller-supplied ID. |
+| GET `/api/analytics/dashboard` | Administrator | Required query parameters `startDate`, `endDate`; invalid or reversed dates return 400. Returns recorded metrics or 503 if they cannot be read. |
+| POST `/api/content/generate` | Authenticated | JSON `topic`, `type` (`blog`, `social`, `email`, `ad-copy`), optional `tone`, `length`, `targetAudience`; calls the configured Anthropic model. Missing key/model returns 503. |
+| POST `/api/chatbot` | Public | JSON `messages` (1–25 `{ "role": "user" or "assistant", "content": "..." }` entries, at most 8,000 characters each), optional `userInfo`; calls Anthropic. Missing key/model returns 503. |
+| POST `/api/payments/create-checkout` | Authenticated | JSON `planType` (`professional` or `enterprise`); returns a Stripe Checkout `url` and `sessionId`. Requires the selected price, API key, and webhook signing secret; missing configuration returns 503. |
+| POST `/api/payments/portal` | Authenticated | No body needed; uses the current user's stored Stripe customer ID and returns a portal `url`. Returns 404 without a stored customer. |
+| POST `/api/payments/webhook` | Stripe signature | Raw Stripe event body plus `stripe-signature`; validates the signature before updating subscription records. See event setup below. |
+
+Example contact request:
+
+```javascript
+const response = await fetch('/api/contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'Example Person',
+    email: 'person@example.com',
+    subject: 'Product question',
+    message: 'Please tell me which features are available.',
+  }),
 });
+if (!response.ok) throw new Error('Message could not be saved');
 ```
 
-## API Endpoints
+Contact requests are visible to administrators on `/dashboard`. The dashboard also shows database-derived metrics and billing review events. It is not accessible anonymously.
 
-### Authentication
+## Billing events and failures
 
-#### POST `/api/auth/callback/credentials`
-Login with email and password.
+Configure a Stripe sandbox webhook using API version `2026-11-18.endive` and the event list in [README.md](README.md#stripe-subscriptions). The processor uses current Stripe state, per-user transaction locking, and upserts to tolerate duplicate or delayed events. Unpaid Checkout completion does not grant access. Active or trialing subscriptions with configured prices set the account tier; other statuses do not grant a paid tier.
 
-**Request:**
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
+Invalid signatures return 400. Missing webhook configuration returns 503. Database/provider failures return 500 so Stripe retries rather than treating an unprocessed event as successful. Events unrelated to the application's subscriptions may return `{ "received": true, "handled": false }`. Refunds, disputes, fraud warnings, and invoice failures produce administrator review records; they do not trigger automatic refunds or cancellations.
 
-**Response:**
-```json
-{
-  "user": {
-    "id": "clxxx",
-    "email": "user@example.com",
-    "name": "John Doe"
-  }
-}
-```
+## Operational limits
 
----
+Use a hosting-layer rate limit for public endpoints and validate the full provider flow in a sandbox before live use. This repository does not implement a universal per-user request quota. The contact endpoint and chatbot validate payload bounds, but those checks are not a replacement for request-rate controls.
 
-### Payments (Stripe)
-
-#### POST `/api/payments/create-checkout`
-Create a Stripe checkout session for subscription.
-
-**Auth:** Required
-
-**Request:**
-```json
-{
-  "planType": "professional" // or "enterprise"
-}
-```
-
-**Response:**
-```json
-{
-  "sessionId": "cs_test_xxx",
-  "url": "https://checkout.stripe.com/..."
-}
-```
-
-**Errors:**
-- `401` - Unauthorized
-- `400` - Invalid plan type
-- `500` - Failed to create session
-
----
-
-#### POST `/api/payments/webhook`
-Webhook endpoint for Stripe events.
-
-**Auth:** Stripe signature verification
-
-**Headers:**
-```
-stripe-signature: xxx
-```
-
-**Handled Events:**
-- `checkout.session.completed`
-- `customer.subscription.updated`
-- `customer.subscription.deleted`
-- `invoice.payment_succeeded`
-- `invoice.payment_failed`
-
----
-
-#### POST `/api/payments/portal`
-Create a Stripe customer portal session.
-
-**Auth:** Required
-
-**Response:**
-```json
-{
-  "url": "https://billing.stripe.com/session/..."
-}
-```
-
----
-
-### Email
-
-#### POST `/api/email/send`
-Send a transactional email.
-
-**Request:**
-```json
-{
-  "to": "user@example.com",
-  "subject": "Welcome!",
-  "html": "<h1>Welcome to our platform</h1>",
-  "text": "Welcome to our platform", // optional
-  "replyTo": "support@example.com" // optional
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "xxx"
-  }
-}
-```
-
----
-
-#### POST `/api/email/subscribe`
-Subscribe to newsletter.
-
-**Request:**
-```json
-{
-  "email": "user@example.com",
-  "name": "John Doe", // optional
-  "source": "landing-page", // optional
-  "tags": ["newsletter", "blog"] // optional
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Subscribed successfully"
-}
-```
-
----
-
-### Analytics
-
-#### POST `/api/analytics/track`
-Track an analytics event.
-
-**Request:**
-```json
-{
-  "event": "button_click",
-  "properties": {
-    "buttonId": "cta-signup",
-    "page": "/pricing"
-  },
-  "sessionId": "session_xxx",
-  "userId": "user_xxx" // optional
-}
-```
-
-**Response:**
-```json
-{
-  "success": true
-}
-```
-
-**Common Events:**
-- `page_view`
-- `button_click`
-- `form_submission`
-- `signup`
-- `purchase`
-
----
-
-#### GET `/api/analytics/dashboard`
-Get dashboard metrics.
-
-**Auth:** Required (Admin only)
-
-**Query Parameters:**
-- `startDate` (ISO 8601 date string)
-- `endDate` (ISO 8601 date string)
-
-**Example:**
-```
-GET /api/analytics/dashboard?startDate=2025-01-01&endDate=2025-01-31
-```
-
-**Response:**
-```json
-{
-  "metrics": {
-    "pageViews": 15420,
-    "uniqueVisitors": 3240,
-    "signups": 87,
-    "purchases": 12,
-    "revenue": 348.00,
-    "conversionRate": 0.37
-  }
-}
-```
-
----
-
-### AI Features
-
-#### POST `/api/content/generate`
-Generate AI content.
-
-**Auth:** Required
-
-**Request:**
-```json
-{
-  "topic": "Productivity Tips for Remote Teams",
-  "type": "blog", // "blog" | "social" | "email" | "ad-copy"
-  "tone": "professional", // optional
-  "length": "medium", // optional: "short" | "medium" | "long"
-  "targetAudience": "remote workers" // optional
-}
-```
-
-**Response:**
-```json
-{
-  "content": "<h2>Introduction</h2><p>...</p>",
-  "usage": {
-    "input_tokens": 245,
-    "output_tokens": 1823
-  }
-}
-```
-
----
-
-#### POST `/api/chatbot`
-Chat with AI assistant.
-
-**Request:**
-```json
-{
-  "messages": [
-    {
-      "role": "user",
-      "content": "How can I improve team productivity?"
-    }
-  ],
-  "userInfo": { // optional
-    "subscriptionTier": "professional",
-    "interests": ["automation", "remote-work"]
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "message": "Here are some strategies to improve team productivity...",
-  "usage": {
-    "input_tokens": 123,
-    "output_tokens": 456
-  }
-}
-```
-
----
-
-## Error Responses
-
-All endpoints follow a consistent error format:
-
-```json
-{
-  "error": "Error message here",
-  "details": {} // optional, for validation errors
-}
-```
-
-### HTTP Status Codes
-
-- `200` - Success
-- `201` - Created
-- `400` - Bad Request
-- `401` - Unauthorized
-- `403` - Forbidden
-- `404` - Not Found
-- `429` - Too Many Requests
-- `500` - Internal Server Error
-
----
-
-## Rate Limiting
-
-- **Anonymous requests:** 100 requests per 15 minutes
-- **Authenticated requests:** 1000 requests per 15 minutes
-- **AI endpoints:** 50 requests per hour
-
-Rate limit headers:
-```
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 95
-X-RateLimit-Reset: 1640000000
-```
-
----
-
-## Webhooks
-
-### Stripe Webhooks
-
-Configure in Stripe Dashboard:
-- URL: `https://your-domain.com/api/payments/webhook`
-- Events: All payment-related events
-
-### Security
-
-All webhooks are verified using signature verification. Invalid signatures are rejected with `400 Bad Request`.
-
----
-
-## SDKs and Libraries
-
-### TypeScript/JavaScript
-
-```typescript
-// Example client wrapper
-class ProductivityAIClient {
-  constructor(private baseUrl: string) {}
-
-  async trackEvent(event: string, properties: any) {
-    return fetch(`${this.baseUrl}/api/analytics/track`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event, properties }),
-      credentials: 'include',
-    });
-  }
-
-  async generateContent(options: GenerateContentOptions) {
-    return fetch(`${this.baseUrl}/api/content/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(options),
-      credentials: 'include',
-    });
-  }
-}
-```
-
----
-
-## Best Practices
-
-1. **Always include proper error handling**
-```typescript
-try {
-  const response = await fetch('/api/endpoint');
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  const data = await response.json();
-} catch (error) {
-  console.error('API error:', error);
-}
-```
-
-2. **Use TypeScript for type safety**
-```typescript
-interface TrackEventRequest {
-  event: string;
-  properties?: Record<string, any>;
-  sessionId: string;
-  userId?: string;
-}
-```
-
-3. **Implement retries for transient failures**
-```typescript
-async function fetchWithRetry(url: string, options: any, retries = 3) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await fetch(url, options);
-    } catch (error) {
-      if (i === retries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-    }
-  }
-}
-```
-
----
-
-## Support
-
-For API support:
-- Email: api-support@productivity-ai-hub.com
-- GitHub Issues: https://github.com/nrk8286/productivity-ai-hub/issues
-- Documentation: https://docs.productivity-ai-hub.com
+There is no bulk email queue, scheduled newsletter pipeline, invoice accounting ledger, public signup UI, or self-service checkout interface. Error responses do not prove a provider or database is configured. The documented local tests use disposable data and do not certify hosted credentials, production payments, or email delivery.

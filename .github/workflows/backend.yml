@@ -1,0 +1,27 @@
+name: Backend validation
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build
+        env:
+          NEXTAUTH_SECRET: local-ci-only-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:1/build_only
+          NEXT_TELEMETRY_DISABLED: '1'

@@ -32,9 +32,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  pages: {
-    signIn: "/login",
-  },
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -98,16 +95,3 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
-
-export async function getCurrentUser(sessionToken?: string) {
-  if (!sessionToken) return null;
-
-  try {
-    // In production, this would properly validate the session token
-    // For now, this is a placeholder that requires proper implementation
-    // with session token validation
-    return null;
-  } catch {
-    return null;
-  }
-}

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const { session: portalSession, error } = await createCustomerPortalSession({
       customerId: user.stripeCustomerId,
-      returnUrl: `${baseUrl}/dashboard/settings`,
+      returnUrl: `${baseUrl}/dashboard`,
     });
 
     if (error || !portalSession) {

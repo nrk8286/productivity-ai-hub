@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { getAnthropicModel } from "./config";
 
 const anthropic = process.env.ANTHROPIC_API_KEY
   ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -44,7 +45,7 @@ Guidelines:
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: getAnthropicModel(),
       max_tokens: maxTokens,
       system: systemPrompt,
       messages: messages.map((msg) => ({
@@ -84,7 +85,7 @@ export async function suggestNextQuestions(
 
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: getAnthropicModel(),
       max_tokens: 200,
       messages: [
         ...conversationHistory,

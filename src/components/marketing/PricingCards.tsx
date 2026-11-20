@@ -65,7 +65,7 @@ export default function PricingCards() {
           Simple, Transparent Pricing
         </h2>
         <p className="mx-auto max-w-[700px] text-muted-foreground">
-          Choose the perfect plan for your team. Always know what you'll pay.
+          Choose the perfect plan for your team. Always know what you&apos;ll pay.
         </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-3">

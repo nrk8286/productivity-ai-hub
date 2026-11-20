@@ -15,17 +15,27 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsSubmitting(false);
-    setSubmitted(true);
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setError("");
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error("We could not save your message. Please try again later.");
+      setSubmitted(true);
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch {
+      setError("We could not save your message. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -43,7 +53,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-lg text-muted-foreground max-w-[600px] mx-auto">
-            Have questions? Want to learn more? We'd love to hear from you. Our team typically responds within 24 hours.
+            Send your questions to our team using the form below.
           </p>
         </div>
 
@@ -58,8 +68,8 @@ export default function ContactPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <a href="mailto:hello@productivity-ai-hub.com" className="text-primary hover:underline">
-                  hello@productivity-ai-hub.com
+                <a href="#contact-form" className="text-primary hover:underline">
+                  Use the contact form
                 </a>
               </CardContent>
             </Card>
@@ -67,13 +77,13 @@ export default function ContactPage() {
             <Card>
               <CardHeader>
                 <MessageSquare className="h-8 w-8 text-primary mb-2" />
-                <CardTitle>Live Chat</CardTitle>
+                <CardTitle>Support</CardTitle>
                 <CardDescription>
-                  Get instant answers from our team
+                  Send a question for our team to review
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button>Start Chat</Button>
+                <a href="#contact-form" className="text-primary underline">Send a message</a>
               </CardContent>
             </Card>
 
@@ -92,7 +102,7 @@ export default function ContactPage() {
             <CardHeader>
               <CardTitle>Send us a message</CardTitle>
               <CardDescription>
-                Fill out the form below and we'll get back to you shortly.
+                Fill out the form below and we&apos;ll get back to you shortly.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -101,13 +111,14 @@ export default function ContactPage() {
                   <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
                     <Send className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
+                  <h3 className="text-lg font-semibold mb-2">Message received</h3>
                   <p className="text-muted-foreground">
-                    We'll get back to you within 24 hours.
+                    Your message has been saved for our team to review.
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form id="contact-form" onSubmit={handleSubmit} className="space-y-4">
+                  {error && <p role="alert" className="text-destructive">{error}</p>}
                   <div>
                     <Input
                       name="name"

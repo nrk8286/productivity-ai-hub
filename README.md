@@ -1,276 +1,83 @@
-# Productivity AI Hub 🚀
+# Productivity AI Hub
 
-> AI-powered marketing website for remote team productivity tools - Complete with monetization, automation, and analytics
+A Next.js 15 marketing site with PostgreSQL/Prisma persistence, credentials-based accounts, an administrator dashboard, contact submissions, and server integrations for Stripe, Resend, and Anthropic. Provider configuration and database schema setup are required before these integrations can run on a hosted deployment.
 
-A fully-functional, production-ready Next.js 14 application featuring AI-powered content generation, Stripe payments, email automation, and comprehensive analytics.
+## Local setup
 
-## ✨ Features
+Use Node.js 22 or 24 and a disposable PostgreSQL database for development.
 
-### 🎯 Marketing & Content
-- **50+ SEO-optimized blog posts** with AI-generated content
-- **Tools directory** with affiliate links and reviews
-- **Free templates** for productivity and workflow optimization
-- **Dynamic pricing pages** with interactive features
-- **Newsletter subscription** with automated sequences
-- **Contact forms** with validation and email integration
-
-### 🤖 AI-Powered Features
-- **AI Content Generator** using Claude 3.5 Sonnet
-- **Intelligent Chatbot** for customer support
-- **Automated Blog Post Generation** script
-- **Smart Personalization** based on user behavior
-
-### 💳 Monetization
-- **Stripe Integration** for subscriptions and one-time payments
-- **Three-tier pricing** (Free, Professional, Enterprise)
-- **Customer Portal** for subscription management
-- **Webhook handling** for payment events
-- **Affiliate product tracking**
-
-### 📊 Analytics & Tracking
-- **Custom Analytics** with Prisma database
-- **Event Tracking** (page views, clicks, conversions)
-- **Revenue Dashboard** with key metrics
-- **User behavior tracking**
-
-### 🔐 Authentication & Security
-- **NextAuth.js** integration
-- **Role-based access control** (User, Admin)
-- **Secure password hashing**
-- **Protected API routes**
-
-### 📧 Email Automation
-- **Resend** integration for transactional emails
-- **Welcome email** sequence
-- **Onboarding** drip campaign (3 emails)
-- **Cart abandonment** recovery
-- **Newsletter** distribution
-
-## 🛠️ Tech Stack
-
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS + Shadcn/ui
-- **Database:** PostgreSQL with Prisma ORM
-- **Authentication:** NextAuth.js
-- **Payments:** Stripe
-- **Email:** Resend
-- **AI:** Anthropic Claude API
-- **Deployment:** Vercel-ready
-
-## 📦 Installation
-
-### Prerequisites
-
-- Node.js 18+ 
-- PostgreSQL database
-- Stripe account
-- Resend account
-- Anthropic API key
-
-### Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/nrk8286/productivity-ai-hub.git
-   cd productivity-ai-hub
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Fill in your environment variables:
-   ```env
-   # Database
-   DATABASE_URL="postgresql://user:password@localhost:5432/productivity_hub"
-   
-   # NextAuth
-   NEXTAUTH_URL="http://localhost:3000"
-   NEXTAUTH_SECRET="your-secret-key"
-   
-   # Stripe
-   STRIPE_SECRET_KEY="sk_test_..."
-   STRIPE_PUBLISHABLE_KEY="pk_test_..."
-   STRIPE_WEBHOOK_SECRET="whsec_..."
-   
-   # Resend
-   RESEND_API_KEY="re_..."
-   RESEND_FROM_EMAIL="noreply@yourdomain.com"
-   
-   # Anthropic
-   ANTHROPIC_API_KEY="sk-ant-..."
-   
-   # App Config
-   NEXT_PUBLIC_APP_URL="http://localhost:3000"
-   NEXT_PUBLIC_APP_NAME="Productivity AI Hub"
-   ```
-
-4. **Set up the database**
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
-
-5. **Generate blog content** (Optional)
-   ```bash
-   npm run generate-content
-   ```
-
-6. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-7. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import your repository in Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
-
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
-
-## 📝 Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run db:push` - Push Prisma schema to database
-- `npm run db:studio` - Open Prisma Studio
-- `npm run generate-content` - Generate 50 blog posts
-
-## 📚 Documentation
-
-- [Deployment Guide](./DEPLOYMENT.md) - Step-by-step deployment instructions
-- [Monetization Strategy](./MONETIZATION.md) - Revenue generation guide
-- [Content Strategy](./CONTENT_STRATEGY.md) - SEO and content marketing
-- [API Documentation](./API_DOCUMENTATION.md) - API endpoints reference
-
-## 🏗️ Project Structure
-
-```
-productivity-ai-hub/
-├── src/
-│   ├── app/                    # Next.js 14 App Router
-│   │   ├── (marketing)/        # Marketing pages
-│   │   │   ├── blog/           # Blog listing and posts
-│   │   │   ├── tools/          # Tools directory
-│   │   │   ├── pricing/        # Pricing page
-│   │   │   └── ...
-│   │   ├── (dashboard)/        # Protected dashboard
-│   │   ├── api/                # API routes
-│   │   │   ├── auth/           # Authentication
-│   │   │   ├── payments/       # Stripe integration
-│   │   │   ├── email/          # Email sending
-│   │   │   └── ...
-│   │   └── layout.tsx          # Root layout
-│   ├── components/
-│   │   ├── marketing/          # Marketing components
-│   │   ├── ui/                 # Shadcn/ui components
-│   │   ├── automation/         # Automation components
-│   │   └── analytics/          # Analytics components
-│   └── lib/
-│       ├── ai/                 # AI integrations
-│       ├── analytics/          # Analytics tracking
-│       ├── email/              # Email functions
-│       ├── monetization/       # Payment processing
-│       ├── auth.ts             # Auth configuration
-│       ├── db.ts               # Database client
-│       └── utils.ts            # Utility functions
-├── prisma/
-│   └── schema.prisma           # Database schema
-├── content/
-│   └── blog-posts.json         # Generated blog content
-├── scripts/
-│   └── generate-content.ts     # Content generation
-├── public/                     # Static assets
-└── ...config files
-
+```powershell
+npm ci
+Copy-Item .env.example .env
 ```
 
-## 🔑 Key Features Implementation
+Set `DATABASE_URL`, a random `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, and `NEXT_PUBLIC_APP_URL` in the ignored `.env`. Both URLs must identify the origin users actually visit. Generate a secret with `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Example values are placeholders, not working credentials.
 
-### AI Content Generation
-```typescript
-import { generateContent } from '@/lib/ai/content-generator';
-
-const result = await generateContent({
-  topic: "AI Productivity Tools",
-  type: "blog",
-  tone: "professional",
-  length: "long",
-});
+```powershell
+npx prisma generate
+npm run db:push
+npm run dev
 ```
 
-### Stripe Payments
-```typescript
-import { createCheckoutSession } from '@/lib/monetization/stripe';
+`db:push` changes the selected database schema. Use it on a new local database. Review and apply a proper migration against an existing hosted database; application builds never run schema changes automatically. The schema now includes contact messages, billing subscription snapshots, and billing review records.
 
-const { session } = await createCheckoutSession({
-  priceId: "price_xxx",
-  userId: user.id,
-  userEmail: user.email,
-  successUrl: "/success",
-  cancelUrl: "/cancel",
-});
+Accounts are provisioned explicitly; there is no public signup UI. With `DATABASE_URL` set in the process environment, set `ACCOUNT_EMAIL`, `ACCOUNT_PASSWORD` (12+ characters, at most 72 UTF-8 bytes), and optionally `ACCOUNT_ROLE=ADMIN`, then run `npm run account:create`. The command creates one account and never overwrites existing users. Remove the password from the process environment afterward. Sign in at `/login`; NextAuth supplies the credentials form and CSRF handling.
+
+## Connected flows
+
+- `/contact` POSTs to `/api/contact`. Success appears only after PostgreSQL saves the message. Administrators see the latest 20 messages on `/dashboard`; ordinary accounts cannot see them. Contact submission saves a message and does not send email.
+- `/dashboard` requires a session. Administrators see database-derived analytics, contact messages, and billing issues. Other users see their account and current subscription tier. Database outages show an error instead of sample or zero-valued metrics.
+- `/api/email/send` requires an administrator session. `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL` are required. Newsletter signup persists subscriber records; scheduled welcome/drip delivery is not implemented.
+- `/api/chatbot` and `/api/content/generate` require `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`. Choose a supported model available to your account. The previous hardcoded Claude Sonnet 3.5 model was retired; see [Anthropic's model deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations). Content generation also requires a session. The content-generation script is an explicit, potentially billable operation.
+- `/api/analytics/dashboard` requires an administrator session and valid `startDate`/`endDate` query parameters. Its revenue metric counts completed `Order` rows; it is not a Stripe revenue reconciliation report.
+- `/sitemap.xml` serves the existing public sitemap. Set its URLs to your actual domain before publishing.
+
+The marketing pages describe proposed team/storage features that this repository does not implement. Pricing calls to action lead to contact requests; there is no self-service signup or checkout interface. Do not represent those product features as tested backend capabilities.
+
+## Stripe subscriptions
+
+Use separate Stripe sandboxes for development and CI. Store provider keys in the hosting platform's secret manager, and prefer a restricted Stripe API key with only the required permissions. Configure:
+
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PROFESSIONAL_PRICE_ID`, `STRIPE_ENTERPRISE_PRICE_ID` from the correct sandbox/account
+- `NEXT_PUBLIC_APP_URL` for Checkout and portal return URLs
+
+The SDK is Stripe 23.2, whose default API version is `2026-11-18.endive`. Configure the webhook destination for that version. Signed webhook bodies must reach `/api/payments/webhook` unchanged. Enable the events the processor handles:
+
+```text
+checkout.session.completed
+checkout.session.async_payment_succeeded
+customer.subscription.created
+customer.subscription.updated
+customer.subscription.deleted
+customer.subscription.paused
+customer.subscription.resumed
+invoice.paid
+invoice.payment_failed
+invoice.finalization_failed
+charge.refunded
+charge.dispute.created
+radar.early_fraud_warning.created
 ```
 
-### Email Automation
-```typescript
-import { sendWelcomeEmail } from '@/lib/email/send';
+Authenticated clients can POST `{ "planType": "professional" }` or `enterprise` to `/api/payments/create-checkout`. Checkout attaches the application user ID to the subscription metadata and reuses an existing Stripe customer. Duplicate requests for the same user/price share a five-minute idempotency window. Accounts with an active stored subscription must use `/api/payments/portal` to manage it. These endpoints return URLs for the client to open.
 
-await sendWelcomeEmail(user.email, user.name);
+The webhook processor retrieves the current subscription inside a database transaction serialized per user. It persists the customer/subscription association and derives the account tier from active or trialing subscriptions. Incomplete, past-due, unpaid, paused, and canceled subscriptions do not grant a paid tier. Duplicate and delayed events refresh current state; database or provider errors fail the webhook so Stripe can retry. An unpaid Checkout completion does not fulfill an account.
+
+Invoice failures, refunds, disputes, and fraud warnings create administrator review records. Review those records and the corresponding events in Stripe. The app does not automatically refund payments or cancel subscriptions based on a risk event. It does not mirror Stripe customer contact details or build an invoice accounting ledger. Evaluate Stripe Tax and required registrations before charging customers; tax collection is not enabled by this code.
+
+Local tests use Stripe API fixtures and a disposable database. A real sandbox Checkout → webhook → account-tier → portal flow must pass before enabling live billing. No production payment was created during maintenance.
+
+## Deployment and verification
+
+Set environment variables directly for each Vercel environment. The old `@secret` indirections and invalid wildcard credential-CORS configuration were removed. Preview deployments need separate databases and sandbox keys. Leave `ALLOWED_ORIGINS` blank for this same-origin application; if a separate frontend is required, use one exact HTTP(S) origin without a path or trailing slash.
+
+```powershell
+npm test
+npm run lint
+npm run build
 ```
 
-### Analytics Tracking
-```typescript
-import { trackEvent } from '@/lib/analytics/tracking';
+CI runs the billing/CORS regression tests, lint, and a production build without connecting to a database or provider. Local browser verification additionally exercised contact persistence, administrator/member isolation, authentication, missing-provider errors, and Prisma subscription updates against a disposable PostgreSQL-compatible PGlite database. That does not certify a hosted PostgreSQL server or provider credentials.
 
-await trackEvent({
-  event: "button_click",
-  properties: { buttonId: "cta-signup" },
-  sessionId: sessionId,
-  userId: user?.id,
-});
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Shadcn/ui](https://ui.shadcn.com/)
-- [Stripe](https://stripe.com/)
-- [Anthropic](https://anthropic.com/)
-- [Resend](https://resend.com/)
-
-## 💬 Support
-
-Need help? Check out our:
-- [Documentation](./API_DOCUMENTATION.md)
-- [Issues](https://github.com/nrk8286/productivity-ai-hub/issues)
-- [Discussions](https://github.com/nrk8286/productivity-ai-hub/discussions)
-
----
-
-Built with ❤️ for remote teams worldwide
+The dependency audit still reports transitive and major-version advisories after compatible updates. Resolve and retest those upgrades before treating the application as production-ready. Missing hosted environment variables, database migrations, provider setup, and domain configuration remain deployment requirements.

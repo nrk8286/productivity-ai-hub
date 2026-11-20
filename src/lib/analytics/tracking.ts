@@ -157,13 +157,6 @@ export async function getAnalyticsMetrics(
     };
   } catch (error) {
     console.error("Error getting analytics metrics:", error);
-    return {
-      pageViews: 0,
-      uniqueVisitors: 0,
-      signups: 0,
-      purchases: 0,
-      revenue: 0,
-      conversionRate: 0,
-    };
+    throw error;
   }
 }

@@ -1,130 +1,44 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, TrendingUp, Activity } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { getAnalyticsMetrics } from "@/lib/analytics/tracking";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function DashboardPage() {
-  // In production, this would fetch real data
-  const stats = {
-    revenue: 45231,
-    subscribers: 2350,
-    conversionRate: 3.2,
-    activeUsers: 1234,
-  };
-
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) redirect("/login");
+  const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, email: true, role: true, subscriptionTier: true } });
+  if (!user) redirect("/api/auth/signout");
+  if (user.role !== "ADMIN") {
+    return <div className="space-y-4"><h1 className="text-3xl font-bold">Your account</h1><p>{user.name || user.email}</p><p>Plan: {user.subscriptionTier}</p></div>;
+  }
+  const now = new Date();
+  const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const [metrics, subscribers, messages, billingIssues] = await Promise.all([
+    getAnalyticsMetrics(start, now),
+    prisma.subscriber.count({ where: { status: "ACTIVE" } }),
+    prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" }, take: 20 }),
+    prisma.billingIssue.findMany({ orderBy: { createdAt: "desc" }, take: 20 }),
+  ]);
+  const cards = [
+    { title: "Recorded revenue (30 days)", value: `$${metrics.revenue.toFixed(2)}` },
+    { title: "Active subscribers", value: subscribers.toLocaleString() },
+    { title: "Page views (30 days)", value: metrics.pageViews.toLocaleString() },
+    { title: "Recorded purchases (30 days)", value: metrics.purchases.toLocaleString() },
+  ];
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your business metrics and performance
-        </p>
-      </div>
-
+      <div><h1 className="text-3xl font-bold tracking-tight">Dashboard</h1><p className="text-muted-foreground">Activity recorded in your database.</p></div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${stats.revenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Subscribers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.subscribers.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              +180 new this month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.conversionRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              +0.4% from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeUsers.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              +201 since last hour
-            </p>
-          </CardContent>
-        </Card>
+        {cards.map(card => <Card key={card.title}><CardHeader><CardTitle className="text-sm font-medium">{card.title}</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{card.value}</p></CardContent></Card>)}
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
-            <CardDescription>
-              Your revenue for the last 6 months
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-              Revenue chart would go here (Recharts)
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Latest signups and purchases
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">New subscriber</p>
-                  <p className="text-sm text-muted-foreground">
-                    user@example.com - 2 minutes ago
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">Professional plan purchased</p>
-                  <p className="text-sm text-muted-foreground">
-                    $29.00 - 15 minutes ago
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">New subscriber</p>
-                  <p className="text-sm text-muted-foreground">
-                    customer@example.com - 1 hour ago
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card><CardHeader><CardTitle>Billing events to review</CardTitle></CardHeader><CardContent>
+        {billingIssues.length === 0 ? <p>No billing issues recorded.</p> : <ul className="space-y-2">{billingIssues.map(issue => <li key={issue.id}><p>{issue.type}: {issue.objectId}</p><p className="text-sm text-muted-foreground">{issue.subscriptionId || "No subscription identified"} — review this event in Stripe.</p></li>)}</ul>}
+      </CardContent></Card>
+      <Card><CardHeader><CardTitle>Recent contact messages</CardTitle></CardHeader><CardContent>
+        {messages.length === 0 ? <p>No messages received yet.</p> : <ul className="space-y-6">{messages.map(message => <li key={message.id} className="border-b pb-4"><h2 className="font-semibold">{message.subject}</h2><p className="text-sm">{message.name} — {message.email}</p><time className="text-sm text-muted-foreground" dateTime={message.createdAt.toISOString()}>{message.createdAt.toISOString()}</time><p className="whitespace-pre-wrap">{message.message}</p></li>)}</ul>}
+      </CardContent></Card>
     </div>
   );
 }

@@ -6,9 +6,9 @@ const chatSchema = z.object({
   messages: z.array(
     z.object({
       role: z.enum(["user", "assistant"]),
-      content: z.string().min(1),
+      content: z.string().min(1).max(8000),
     })
-  ),
+  ).min(1).max(25),
   userInfo: z.object({
     subscriptionTier: z.string().optional(),
     interests: z.array(z.string()).optional(),
@@ -26,6 +26,9 @@ export async function POST(request: NextRequest) {
         { error: "Invalid request data" },
         { status: 400 }
       );
+    }
+    if (!process.env.ANTHROPIC_API_KEY || !process.env.ANTHROPIC_MODEL) {
+      return NextResponse.json({ error: "AI service not configured" }, { status: 503 });
     }
 
     const { messages, userInfo } = validated.data;

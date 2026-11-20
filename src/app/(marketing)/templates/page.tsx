@@ -101,7 +101,7 @@ export default function TemplatesPage() {
           <CardContent className="pt-6">
             <h3 className="text-2xl font-bold mb-2">Need a Custom Template?</h3>
             <p className="text-muted-foreground mb-4">
-              We can create custom templates tailored to your team's specific workflow.
+              We can create custom templates tailored to your team&apos;s specific workflow.
             </p>
             <Button>Contact Us</Button>
           </CardContent>

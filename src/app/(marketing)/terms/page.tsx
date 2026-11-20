@@ -15,7 +15,7 @@ export default function TermsPage() {
 
         <h2>Agreement to Terms</h2>
         <p>
-          By accessing or using Productivity AI Hub ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, you may not access the Service.
+          By accessing or using Productivity AI Hub (&quot;Service&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you disagree with any part of these terms, you may not access the Service.
         </p>
 
         <h2>Description of Service</h2>
@@ -94,7 +94,7 @@ export default function TermsPage() {
 
         <h2>Warranties and Disclaimers</h2>
         <p>
-          THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. We do not warrant that the Service will be uninterrupted, secure, or error-free.
+          THE SERVICE IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF ANY KIND. We do not warrant that the Service will be uninterrupted, secure, or error-free.
         </p>
 
         <h2>Limitation of Liability</h2>

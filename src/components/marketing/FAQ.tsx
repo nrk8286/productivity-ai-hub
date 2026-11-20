@@ -40,7 +40,7 @@ export default function FAQ() {
           Frequently Asked Questions
         </h2>
         <p className="mx-auto max-w-[700px] text-muted-foreground">
-          Got questions? We've got answers.
+          Got questions? We&apos;ve got answers.
         </p>
       </div>
       <div className="mx-auto max-w-3xl">
